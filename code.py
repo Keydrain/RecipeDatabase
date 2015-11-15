@@ -15,22 +15,28 @@ import string
 import mysql.connector
 
 units = ['(15 ounce) can', '(10 inch)', '(12 ounce) jar', '(3 ounce) package', '(2 pound)',
-		 'pints',  'pint', 'cups', 'cup', 'tablespoons', 'tablespoon', 'teaspoons', 'teaspoon', 
+		 'pints',  'pint', 'cups', 'cup', 'tablespoons', 'tablespoon', 'teaspoons', 'teaspoon',
 		 'ounces', 'ounce', 'cloves', 'clove', 'pounts', 'pound', 'dashes', 'dash']
 
+NumTables = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '[database name]' AND table_name = '[table name]'"
+
+
 def scrapePage(addr):
-	source = addr[:[m.start() for m in re.finditer(r"/",addr)][2]]
+	source = addr[:[m.start() for m in re.finditer(r"/", addr)][2]]
 
 	if source == 'http://allrecipes.com':
 		page = requests.get(addr)
 		tree = html.fromstring(page.content)
 
-		ingredients = tree.xpath('//span[@class="recipe-ingred_txt added"]/text()')
-		directions = tree.xpath('//span[@class="recipe-directions__list--item"]/text()')
+		ingredients = tree.xpath(
+			'//span[@class="recipe-ingred_txt added"]/text()')
+		directions = tree.xpath(
+			'//span[@class="recipe-directions__list--item"]/text()')
 		serveSize = tree.xpath('//p[@class="subtext"]/text()')
 		recipeName = tree.xpath('//h1[@class="recipe-summary__h1"]/text()')
 		cookTime = tree.xpath('//span[@class="ready-in-time"]/text()')
-		calorieCount = tree.xpath('//span[@class="calorie-count"]//span/text()')
+		calorieCount = tree.xpath(
+			'//span[@class="calorie-count"]//span/text()')
 
 		ingredientCount = []
 		ingredientUnit = []
@@ -38,17 +44,18 @@ def scrapePage(addr):
 		rescrapePageder = 0
 		for ing in ingredients:
 			ing = ''.join(filter(lambda x: x in string.printable, ing))
-			ingredientCount.append(ing[:[m.start() for m in re.finditer(r" ",ing)][0]])
-			remainder = [m.start() for m in re.finditer(r" ",ing)][0]
+			ingredientCount.append(ing[:[m.start()
+										 for m in re.finditer(r" ", ing)][0]])
+			remainder = [m.start() for m in re.finditer(r" ", ing)][0]
 			step = len(ingredientUnit)
 			for u in units:
 				if ing.find(u) >= 0:
 					ingredientUnit.append(u)
 					remainder = ing.index(u) + len(u)
-					break;
+					break
 			if len(ingredientUnit) == step:
 				ingredientUnit.append('_')
-			ingredientItem.append(ing[remainder+1:])
+			ingredientItem.append(ing[remainder + 1:])
 
 		print(source)
 		print('%s' % recipeName[0])
@@ -63,24 +70,39 @@ def scrapePage(addr):
 
 		print('\nDirections:')
 		for i in range(len(directions)):
-			print('%s:' % str(i+1), directions[i])
+			print('%s:' % str(i + 1), directions[i])
 	else:
 		print('%s is not yet implemented...' % source)
 
-def main():
-	try:
-		cnx = mysql.connector.connect(user='root', 
-									  password='<replace_when_running>',
-		                              host='localhost',
-		                              database='Recipe')
-	except:
-		print('It didn\'t work...')
 
-	scrapePage('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
-	print('\n/-----/\n')
-	scrapePage('http://allrecipes.com/recipe/213742/meatball-nirvana/')
-	print('\n/-----/\n')
-	scrapePage('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
+def RunQuery(cnx, query):
+	cursor = cnx.cursor()
+	cursor.execute(query)
+	result = ['%s' % x for x in cursor]
+	cursor.close()
+	return result
+
+
+def main():
+	cnx = mysql.connector.connect()
+	try:
+		cnx = mysql.connector.connect(user='root',
+									  password='<replace>',
+									  host='localhost',
+									  database='Recipes')
+	except:
+		print('Can\'t connect to MySQL server...\n')
+
+	if int(RunQuery(cnx, NumTables)[0]) == 0:
+		print('Need to setup schema')
+
+	# scrapePage('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	# print('\n/-----/\n')
+	# scrapePage('http://allrecipes.com/recipe/213742/meatball-nirvana/')
+	# print('\n/-----/\n')
+	# scrapePage('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
+
+	cnx.close()
 
 if __name__ == '__main__':
 	main()
