@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `Recipes`.`AMOUNT_REQUIRED` (
 	`Recipe_No` INT NOT NULL COMMENT 'References the recipe the ingredient is intended for',
 	`Ingredient_No` INT NOT NULL COMMENT 'References the ingredient list of the recipe',
 	`Amount` DOUBLE NOT NULL COMMENT 'Amount required for the recipe',
-	`Unit` VARCHAR(10) NOT NULL COMMENT 'The amount measurment for the recipe',
+	`Unit` VARCHAR(20) NOT NULL COMMENT 'The amount measurment for the recipe',
 	PRIMARY KEY (`Recipe_No`, `Ingredient_No`),
 	INDEX `Ingredient_No_idx` (`Ingredient_No`))
 ENGINE = InnoDB;
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `Recipes`.`SOURCE` (
 	`Name` VARCHAR(45) NULL COMMENT 'Name of source',
 	`Reference` VARCHAR(45) NOT NULL COMMENT 'Source information, i.e. url or book title',
 	`Type` VARCHAR(45) NOT NULL COMMENT 'Type should be like: website, blog, cook book, home recipe, etc',
-	`Author-optional` VARCHAR(45) NULL COMMENT 'Include author if availabe- not required',
+	`Author` VARCHAR(45) NULL COMMENT 'Include author if availabe- not required',
 	PRIMARY KEY (`Source_No`))
 ENGINE = InnoDB;
 
@@ -98,11 +98,12 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Recipes`.`NUTRITIONAL_FACTS` (
 	`Nutrition_No` INT NOT NULL COMMENT 'References an ingredient',
+	`Units` VARCHAR(40) NOT NULL COMMENT '',
 	`Calories` INT NOT NULL COMMENT 'Number of Calories- required for DB schema',
-	`Protien` DOUBLE NULL COMMENT 'Amount of Protient- not required',
-	`Sugar` DOUBLE NULL COMMENT 'Amount of Sugar- not required',
-	`Sodium` DOUBLE NULL COMMENT 'Amount of Sodium- not required',
-	`Fat` DOUBLE NULL COMMENT 'Amount of fat- not required',
+	`Protien` VARCHAR(20) NULL COMMENT 'Amount of Protient- not required',
+	`Sugar` VARCHAR(20) NULL COMMENT 'Amount of Sugar- not required',
+	`Sodium` VARCHAR(20) NULL COMMENT 'Amount of Sodium- not required',
+	`Fat` VARCHAR(20) NULL COMMENT 'Amount of fat- not required',
 	PRIMARY KEY (`Nutrition_No`))
 ENGINE = InnoDB;
 
@@ -112,8 +113,8 @@ ENGINE = InnoDB;
 -- #MEASUREMNT_CONVERSION
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Recipes`.`MEASUREMENT_CONVERSION` (
-	`Unit` VARCHAR(10) NOT NULL COMMENT 'Specified unit in recipe',
-	`Standard_Unit` VARCHAR(10) NOT NULL COMMENT 'The standard unit conversion',
+	`Unit` VARCHAR(20) NOT NULL COMMENT 'Specified unit in recipe',
+	`Standard_Unit` VARCHAR(20) NOT NULL COMMENT 'The standard unit conversion',
 	`Unit_to_Standard_Value` FLOAT NOT NULL COMMENT 'The conversion rate',
 	PRIMARY KEY (`Standard_Unit`, `Unit`))
 ENGINE = InnoDB;
@@ -151,16 +152,16 @@ ENGINE = InnoDB;
 -- Table `Recipes`.`COOKWARE`
 -- #COOKWARE
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Recipes`.`COOKWARE` (
-	`Direction_No` INT NOT NULL COMMENT 'References the directions',
-	`Cookware` VARCHAR(45) NOT NULL COMMENT 'The list of cookware recommended for the recipe',
-	PRIMARY KEY (`Cookware`, `Direction_No`),
-	CONSTRAINT `Instruction_List`
-		FOREIGN KEY (`Direction_No`)
-		REFERENCES `Recipes`.`INSTRUCTION_LIST` (`Direction_No`)
-		ON DELETE NO ACTION
-		ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+-- CREATE TABLE IF NOT EXISTS `Recipes`.`COOKWARE` (
+-- 	`Direction_No` INT NOT NULL COMMENT 'References the directions',
+-- 	`Cookware` VARCHAR(45) NOT NULL COMMENT 'The list of cookware recommended for the recipe',
+-- 	PRIMARY KEY (`Cookware`, `Direction_No`),
+-- 	CONSTRAINT `Instruction_List`
+-- 		FOREIGN KEY (`Direction_No`)
+-- 		REFERENCES `Recipes`.`INSTRUCTION_LIST` (`Direction_No`)
+-- 		ON DELETE NO ACTION
+-- 		ON UPDATE NO ACTION)
+-- ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
