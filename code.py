@@ -27,7 +27,9 @@ def scrapePage(addr):
 	if source == 'http://allrecipes.com':
 		page = requests.get(addr)
 		tree = html.fromstring(page.content)
-
+		sourceName = 'Allrecipes'
+		sourceType = "url"
+		author = '//span[@class="submitter__name"]/text()')
 		ingredients = tree.xpath(
 			'//span[@class="recipe-ingred_txt added"]/text()')
 		directions = tree.xpath(
@@ -37,6 +39,7 @@ def scrapePage(addr):
 		cookTime = tree.xpath('//span[@class="ready-in-time"]/text()')
 		calorieCount = tree.xpath(
 			'//span[@class="calorie-count"]//span/text()')
+		recipeType = tree.xpath('//span[@class="toggle-similar__title"]/text()')
 
 		ingredientCount = []
 		ingredientUnit = []
@@ -73,6 +76,65 @@ def scrapePage(addr):
 			print('%s:' % str(i + 1), directions[i])
 	else:
 		print('%s is not yet implemented...' % source)
+	pageInfo = []
+	recipeInfo = [recipeName, serveSize, recipeType]
+	pageInfo.append(recipeInfo)
+	sourceInfo = [sourceName, source, sourceType, author]
+	pageInfo.append(sourceInfo)
+	dircInfo = [directions, cookTime] 
+	pageInfo.append(dircInfo)
+	ingInfo = []
+	pageInfo.append(ingInfo)
+
+	return pageInfo
+
+
+def insertInfo(cnx, pageInfo):
+	recipeNum = cursor.lastrowid
+	addRecipe = ("INSERT INTO RECIPE "
+               "(Recipe_No, Name, Quantity, Type, Direciton_No, Source_No) "
+               "VALUES (%s, %s, %s, %s, %s, %s)")
+	recipeInfo = pageInfo[0]
+	recipe = {'Recipe_No': recipeNum, 'Name': recipeInfo[0], 'Quantity': recipeInfo[1], 'Type': recipeInfo[2], 'Direction_No': recipeNum, 'Source_No': recipeNum }
+	cnx.execute(addRecipe, recipe)
+
+	addSource = ("INSERT INTO SOURCE "
+               "(Source_No, Name, Reference, Type, Author) "
+               "VALUES (%s, %s, %s, %s, %s)")
+	sourceInfo = pageInfo[1]
+	source = {'Source_No': recipeNum, 'Name': sourceInfo[0], 'Reference': sourceInfo[1], 'Type': sourceInfo[2], 'Author': sourceInfo[3]}
+	cnx.execute(addSource, source)
+
+	addInstructions = ("INSERT INTO INSTRUCTION_LIST "
+               "(Direction_No, Description, Prep_Time, Difficulty) "
+               "VALUES (%s, %s, %s, %s)")
+	dircInfo = pageInfo[2]
+	directions = {'Direction_No': recipeNum, 'Description': str(dircInfo[0]), 'Prep_Time': dircInfo[1], 'Difficulty': null}
+	cxn.execute(addInstructions, dirctions)
+
+	addIngredients = = ("INSERT INTO INGREDIENT "
+               "(Ingredient_No, Name, Type, Description, Contains_Dairy, Contains_Glutten) "
+               "VALUES (%s, %s, %s, %s, %s, %s)")
+	ingInfo = pageInfo[3]
+	instructions = {'Ingredient_No':, 'Name':, 'Type':, 'Description':, 'Contains_Dairy':, 'Contains_Glutten':} 
+	cxn.execute(addIngredients, ingrdients)
+
+	addAmounts = ("INSERT INTO AMOUNT_REQUIRED "
+               "(Recipe_No, Ingredient_No, Amount, Unit) "
+               "VALUES (%s, %s, %s, %s)")
+	amountInfo = pageInfo[3]
+	amounts = {'Recipe_No':, 'Ingredient_No':, 'Amount':, 'Unit':} 
+	cxn.execute(addAmounts, amounts)
+
+	addIngredients = = ("INSERT INTO INGREDIENT "
+               "(Ingredient_No, Name, Type, Description, Contains_Dairy, Contains_Glutten) "
+               "VALUES (%s, %s, %s, %s, %s, %s)")
+	ingInfo = pageInfo[3]
+	instructions = {'Ingredient_No':, 'Name':, 'Type':, 'Description':, 'Contains_Dairy':, 'Contains_Glutten':} 
+	cxn.execute(addIngredients, ingrdients)
+
+
+
 
 
 def RunQuery(cnx, query):
@@ -96,7 +158,8 @@ def main():
 	if int(RunQuery(cnx, NumTables)[0]) == 0:
 		print('Need to setup schema')
 
-	# scrapePage('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	pageInfo = scrapePage('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	insertInfo(cns, pageInfo);
 	# print('\n/-----/\n')
 	# scrapePage('http://allrecipes.com/recipe/213742/meatball-nirvana/')
 	# print('\n/-----/\n')
