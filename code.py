@@ -89,7 +89,7 @@ def scrapePage(addr):
 	pageInfo.append(sourceInfo)
 	dircInfo = [directions, cookTime] 
 	pageInfo.append(dircInfo)
-	ingInfo = []
+	ingInfo = [ingredientItem, ingredientCount, ingredientUnit]
 	pageInfo.append(ingInfo)
 
 	return pageInfo
@@ -118,26 +118,25 @@ def insertInfo(cnx, pageInfo):
 	directions = {'Direction_No': recipeNum, 'Description': str(dircInfo[0]), 'Prep_Time': dircInfo[1], 'Difficulty': null}
 	cxn.execute(addInstructions, dirctions)
 
-	addIngredients = = ("INSERT INTO INGREDIENT "
-               "(Ingredient_No, Name, Type, Description, Contains_Dairy, Contains_Glutten) "
-               "VALUES (%s, %s, %s, %s, %s, %s)")
 	ingInfo = pageInfo[3]
-	instructions = {'Ingredient_No':, 'Name':, 'Type':, 'Description':, 'Contains_Dairy':, 'Contains_Glutten':} 
-	cxn.execute(addIngredients, ingrdients)
+	ingName = ingInfo[0]
+	ingAmount = ingInfo[1]
+	ingUnit = ingInfo[2]
+	for i in range(len(ingInfo)):
+		ingNum = cursor.lastrowid
+			
+		addIngredient = ("INSERT INTO INGREDIENT "
+	               "(Ingredient_No, Name, Type, Description, Contains_Dairy, Contains_Glutten) "
+	               "VALUES (%s, %s, %s, %s, %s, %s)")
+		ingredient = {'Ingredient_No': ingNum, 'Name': ingName[i], 'Type':, 'Description':, 'Contains_Dairy':, 'Contains_Glutten':} 
+		cxn.execute(addIngredient, ingredient)
 
-	addAmounts = ("INSERT INTO AMOUNT_REQUIRED "
-               "(Recipe_No, Ingredient_No, Amount, Unit) "
-               "VALUES (%s, %s, %s, %s)")
-	amountInfo = pageInfo[3]
-	amounts = {'Recipe_No':, 'Ingredient_No':, 'Amount':, 'Unit':} 
-	cxn.execute(addAmounts, amounts)
+		addAmount = ("INSERT INTO AMOUNT_REQUIRED "
+	               "(Recipe_No, Ingredient_No, Amount, Unit) "
+	               "VALUES (%s, %s, %s, %s)")
+		amount = {'Recipe_No': recipeNum, 'Ingredient_No':ingNum, 'Amount': ingAmount[i], 'Unit': ingUnit[i]} 
+		cxn.execute(addAmount, amount)
 
-	addIngredients = = ("INSERT INTO INGREDIENT "
-               "(Ingredient_No, Name, Type, Description, Contains_Dairy, Contains_Glutten) "
-               "VALUES (%s, %s, %s, %s, %s, %s)")
-	ingInfo = pageInfo[3]
-	instructions = {'Ingredient_No':, 'Name':, 'Type':, 'Description':, 'Contains_Dairy':, 'Contains_Glutten':} 
-	cxn.execute(addIngredients, ingrdients)
 
 
 
