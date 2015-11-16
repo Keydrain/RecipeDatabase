@@ -137,6 +137,17 @@ def insertInfo(cnx, pageInfo):
 		amount = {'Recipe_No': recipeNum, 'Ingredient_No':ingNum, 'Amount': ingAmount[i], 'Unit': ingUnit[i]} 
 		cxn.execute(addAmount, amount)
 
+	addNutFacts = ("INSERT INTO NUTRIIONAL_FACTS "
+	               "(Nutrition_No, Calories, Protien, Sugar, Sodium, Fat) "
+	               "VALUES (%s, %s, %s, %s, %s, %s)")
+	facts = {'Nutrition_No': , 'Calories': , 'Protien':, 'Sugar':, 'Sodium':, 'Fat':} 
+	cxn.execute(addNutFacts, facts)
+
+	addVitamin = ("INSERT INTO VITAMIN "
+	               "(Nutrition_No, Vitamin) "
+	               "VALUES (%s, %s)")
+	vitamin = {'Nutrition_No': , 'Vitamin': } 
+	cxn.execute(addVitamin, vitamin)
 
 
 
