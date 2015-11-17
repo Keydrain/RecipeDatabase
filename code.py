@@ -44,45 +44,52 @@ def resetDatabase(cnx):
 		RunQuery(cnx, DropTable % x)
 	RunQuery(cnx, ForeignKeysOn)
 
-def scrapeGoogle(ing):
+def scrapeGoogleConverter(unitFrom, unitTo):
+	#Nutrition from, Amount to
+	try:
+		unitFrom = re.sub(r'\([^)]*\)', '', unitFrom)
+		unitTo = re.sub(r'\([^)]*\)', '', unitTo)
+		page = requests.get('https://www.google.com/search?q=%s+to+%s' % (unitFrom, unitTo))
+		tree = html.fromstring(page.content)
+		result = tree.xpath('//table[@class="_tLi"]//tr//td//span[@class="nobr"]//h2[@class="r"]/text()')
+		result = [z for z in [("".join(char for char in x if char in string.digits + ".")) for x in result[0].split(' ')] if z != '']
+		return result[-1]
+	except:
+		return '0'
+
+def scrapeStartCookingConverter(cnx):
+	page = requests.get('http://startcooking.com/measurement-and-conversion-charts')
+	tree = html.fromstring(page.content)
+	print(page.content)
+
+def scrapeGoogleNutrition(ing):
 	ing = re.sub("'", '', ing)
 	ing = re.sub(", or to taste", '', ing)
 	try:
 		page = requests.get('http://www.google.com/search?q=%s+nutrition' % ing)
 		tree = html.fromstring(page.content)
-		#ingType = tree.xpath('//div[@class="kno-fb-ctx"]//span/text()')
 		ingType = tree.xpath('//div[@class="_zdb _Pxg"]/text()')
 		if ingType == []:
 			ingType = ['-']
-		print(ingType)
-		#ingDescription = tree.xpath('//div[@class="kno-rdesc"]//span/text()')
+		#print(ingType)
 		ingDescription = [' '.join((tree.xpath('//div[@class="_tXc"]//span/text()')[0]).split('\n'))]
-		print(ingDescription)
-		#ingAmount = tree.xpath('//div[@class="_Fih"]//select[@class="_sTf kno-nf-ss"]/@title')
+		#print(ingDescription)
 		ingAmount = tree.xpath('//div[@class="_f6d"]/text()')
-		print(ingAmount)
-		#ingCalories = tree.xpath('//tr[@class="kno-fb-ctx kno-nf-cq"]//td//span[@class="abs"]/text()')
+		#print(ingAmount)
 		ingCalories = [tree.xpath('//table[@class="_Y5d"]//tr//td/text()')[0]]
-		print(ingCalories)
-		#ingFat = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/04k8n"]//td[@class="ellip"]//span[@class="abs"]/text()')
+		#print(ingCalories)
 		ingFat = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[1]]
-		print(ingFat)
-		#ingCholesterol = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/01w_3"]//td[@class="ellip"]//span[@class="abs"]/txt()')
+		#print(ingFat)
 		ingCholesterol = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[3]]
-		print(ingCholesterol)
-		#ingSodium = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/025sf0_"]//td[@class="ellip"]//span[@class="abs"]/text()')
+		#print(ingCholesterol)
 		ingSodium = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[5]]
-		print(ingSodium)
-		#ingPotassium = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/025s7j4"]//td[@class="ellip"]//span[@class="abs"]/text()')
+		#print(ingSodium)
 		ingPotassium = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[7]]
-		print(ingPotassium)
-		#ingCarbohydrate = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/01sh2"]//td[@class="ellip"]//span[@class="abs"]/text()')
+		#print(ingPotassium)
 		ingCarbohydrate = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[9]]
-		print(ingCarbohydrate)
-		#ingProtein = tree.xpath('//table[@class="_yX"]//tbody//tr[@data-mid="/m/05wvs"]//td[@class="ellip"]//span[@class="abs"]/text()')
+		#print(ingCarbohydrate)
 		ingProtein = [tree.xpath('//table[@class="_Y5d"]//tr//td[@class="_b6d"]//span/text()')[1]]
-		print(ingProtein)
-		#ingVitamins = tree.xpath('//table[@class="_yX _RXc"]//tbody//tr//td[@class="ellip"]//text()')
+		#print(ingProtein)
 		ingVitamins = tree.xpath('//table[@class="_Y5d"]//tr//td/text()')[20:]
 		i = 0
 		while i < len(ingVitamins)-1: 
@@ -92,7 +99,7 @@ def scrapeGoogle(ing):
 			i += 1
 		ingVitamins = [x for x in ingVitamins if x.find('%') == -1]
 		results = [ing, ingType, ingDescription, ingAmount, ingCalories, ingFat, ingCholesterol, ingSodium, ingPotassium, ingCarbohydrate, ingProtein, ingVitamins]
-		print(results)
+		#print(results)
 		return results
 	except:
 		return [ing]
@@ -132,15 +139,10 @@ def scrapeRecipe(addr):
 					remainder = ing.index(u) + len(u)
 					break
 			if len(ingredientUnit) == step:
-				ingredientUnit.append("UNKNOWN")
+				ingredientUnit.append("-")
 			ingredientItem.append(ing[remainder + 1:])
 
-			# At this point we have source, recipeName[0], serveSize[0], cookTime[0], calorieCount[0],
-			# ingredientCount[-], ingredientUnit[-], ingredientItem[-], directions[-]
-
-			# May need to flatten Directions with '\n'.join(['%d: %s\n' % i, Directions[i] for i in range(len(Directions)))
-
-		print(source)
+		#print(source)
 		print('%s' % recipeName[0])
 		print('%s' % author[0])
 		print('%s' % serveSize[0])
@@ -154,13 +156,13 @@ def scrapeRecipe(addr):
 		for i in range(len(ingredients)):
 			#print(''.join(filter(lambda x: x in string.printable, ingredients[i])))
 			print(ingredientCount[i], ingredientUnit[i], ingredientItem[i])
-			ingredientDetials.append(scrapeGoogle(ingredientItem[i]))
+			ingredientDetials.append(scrapeGoogleNutrition(ingredientItem[i]))
 			print()
 
 		print('\nDirections:')
 		#for i in range(len(directions)):
 		#	print('%s:' % str(i + 1), directions[i])
-		directions = ('\n'.join(['%d: %s\n' % (i+1, directions[i]) for i in range(len(directions))]))
+		directions = ('\n'.join(['%d: %s' % (i+1, directions[i]) for i in range(len(directions))]))
 		print(directions)
 
 		pageInfo = []
@@ -191,6 +193,7 @@ def insertInfo(cnx, pageInfo):
 	addNutrition = "INSERT INTO NUTRITIONAL_FACTS (Nutrition_No, Units, Calories, Protien, Sugar, Sodium, Fat) VALUES (%s, '%s', '%s', '%s', '%s', '%s', '%s')"
 	addDirection = "INSERT INTO INSTRUCTION_LIST (Direction_No, Directions, Prep_Time, Difficulty) VALUES (%s, '%s', '%s', %s)"
 	addVitamin = "INSERT INTO VITAMIN (Nutrition_No, Vitamin) VALUES (%s, '%s')"
+	addConversion = "INSERT INTO MEASUREMENT_CONVERSION (Unit, Standard_Unit, Unit_to_Standard_Value) SELECT * FROM (SELECT '{0}', '{1}', '{2}') AS tmp WHERE NOT EXISTS (SELECT * FROM MEASUREMENT_CONVERSION WHERE Unit = '{0}' AND Standard_Unit = '{1}' AND Unit_to_Standard_Value = '{2}') LIMIT 1;"
 
 	recipeInfo = pageInfo[0]
 	sourceInfo = pageInfo[1]
@@ -214,23 +217,27 @@ def insertInfo(cnx, pageInfo):
 
 		if len(ingredInfo[i]) > 1:
 			ingredient = (ingredientNum, ingredInfo[i][0], ingredInfo[i][1][0], ingredInfo[i][2][0], 0, 1 if ingredInfo[i][9] != 0 else 0, nutritionNum)
-			nutrition = (nutritionNum, ingredInfo[i][3][0], ingredInfo[i][4][0], ingredInfo[i][10][0], ingredInfo[i][9][0], ingredInfo[i][7][0], ingredInfo[i][5][0])
+			nutrition = (nutritionNum, re.findall(r"[\w']+", ingredInfo[i][3][0])[1], ingredInfo[i][4][0], ingredInfo[i][10][0], ingredInfo[i][9][0], ingredInfo[i][7][0], ingredInfo[i][5][0])
 		else:
 			ingredient = (ingredientNum, ingredInfo[i][0], '-', '-', 0, 0, ingredientNum)
 			nutrition = (nutritionNum, '-', 0, 0, 0, 0, 0)
-		RunQuery(cnx, addNutrition % nutrition)
-		RunQuery(cnx, addIngredient % ingredient)
+		RunQuery(cnx, ''.join(filter(lambda x: x in string.printable, addNutrition % nutrition)))
+		RunQuery(cnx, ''.join(filter(lambda x: x in string.printable, addIngredient % ingredient)))
 		if len(ingredInfo[i]) > 1:
 			#Vitamins
 			for x in ingredInfo[i][-1]:
 				vitamin = (nutritionNum, x)
 				RunQuery(cnx, addVitamin % vitamin)
+			#convValue = scrapeGoogleConverter(ingredInfo[i][3][0], amountInfo[1][i])
+			#print(addConversion.format(re.sub(r'\([^)]*\)', '', ingredInfo[i][3][0]), amountInfo[1][i], convValue))
+			#RunQuery(cnx, addConversion.format(re.sub(r'\([^)]*\)', '', ingredInfo[i][3][0]), amountInfo[1][i], convValue))
 
 	direction = (recipeNum, directInfo[0], directInfo[1][0], 0)
 	RunQuery(cnx, addDirection % direction)
 
 	recipe = (recipeNum, recipeInfo[0], recipeInfo[1], recipeInfo[2], recipeInfo[3], recipeNum, sourceNum)
 	RunQuery(cnx, addRecipe % recipe)
+
 
 def RunQuery(cnx, query):
 	print('\nRun: %s' % query)
@@ -263,25 +270,33 @@ def RunSQLFile(cnx, filename):
 def main():
 	cnx = mysql.connector.connect()
 	try:
-		cnx = mysql.connector.connect(user='root', password='umbranium', host='localhost', database='Recipes')
+		cnx = mysql.connector.connect(user='root', password='<replace>', host='localhost', database='Recipes')
 	except:
 		print('Can\'t connect to MySQL server...\n')
 
-	resetDatabase(cnx)
-	if RunQuery(cnx, NumTables)[0][0] == 0:
-		print("Run: Create tables from SchemaSetup.")
-		RunSQLFile(cnx, 'SchemaSetup.sql')
-	else:
-		print('Tables already built.')
-		resetTables(cnx)
-	print()
+	#resetDatabase(cnx)
+	#if RunQuery(cnx, NumTables)[0][0] == 0:
+	#	print("Run: Create tables from SchemaSetup.")
+	#	RunSQLFile(cnx, 'SchemaSetup.sql')
+	#else:
+	#	print('Tables already built.')
+	#	resetTables(cnx)
+	#print()
+	##scrapeTableConverter(cnx)
+	#RunSQLFile(cnx, 'MEASUREMENT_CONVERSION.sql')
+#
+	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	#insertInfo(cnx, pageInfo)
+	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/213742/meatball-nirvana/')
+	#insertInfo(cnx, pageInfo)
+	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
+	#insertInfo(cnx, pageInfo)
 
-	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/14773/tangy-bbq-ribs/?internalSource=staff%20pick&referringId=673&referringContentType=recipe%20hub')
 	insertInfo(cnx, pageInfo)
-	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/213742/meatball-nirvana/')
+
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/9023/baked-teriyaki-chicken/?internalSource=staff%20pick&referringId=80&referringContentType=recipe%20hub')
 	insertInfo(cnx, pageInfo)
-	# print('\n/-----/\n')
-	# scrapeRecipe('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
 
 	try: cnx.close()
 	except: None

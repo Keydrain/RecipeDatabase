@@ -98,7 +98,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Recipes`.`NUTRITIONAL_FACTS` (
 	`Nutrition_No` INT NOT NULL COMMENT 'References an ingredient',
-	`Units` VARCHAR(40) NOT NULL COMMENT '',
+	`Units` VARCHAR(40) NOT NULL COMMENT 'Units used for standard measurements',
 	`Calories` INT NOT NULL COMMENT 'Number of Calories- required for DB schema',
 	`Protien` VARCHAR(20) NULL COMMENT 'Amount of Protient- not required',
 	`Sugar` VARCHAR(20) NULL COMMENT 'Amount of Sugar- not required',
@@ -113,10 +113,10 @@ ENGINE = InnoDB;
 -- #MEASUREMNT_CONVERSION
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Recipes`.`MEASUREMENT_CONVERSION` (
-	`Unit` VARCHAR(20) NOT NULL COMMENT 'Specified unit in recipe',
-	`Standard_Unit` VARCHAR(20) NOT NULL COMMENT 'The standard unit conversion',
-	`Unit_to_Standard_Value` FLOAT NOT NULL COMMENT 'The conversion rate',
-	PRIMARY KEY (`Standard_Unit`, `Unit`))
+	`Unit1` VARCHAR(20) NOT NULL COMMENT 'Specified unit in recipe',
+	`Unit2` VARCHAR(20) NOT NULL COMMENT 'The standard unit conversion',
+	`Conversion_Rate` FLOAT NOT NULL COMMENT 'The conversion rate',
+	PRIMARY KEY (`Unit1`, `Unit2`))
 ENGINE = InnoDB;
 
 
@@ -126,7 +126,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Recipes`.`INGREDIENT` (
 	`Ingredient_No` INT NOT NULL COMMENT 'Ingrdient required in the recipe',
-	`Name` VARCHAR(45) NOT NULL COMMENT 'Ingredient Name',
+	`Name` VARCHAR(90) NOT NULL COMMENT 'Ingredient Name',
 	`Type` VARCHAR(45) NOT NULL COMMENT 'Type: meat, veggie, etc',
 	`Description` TINYTEXT NOT NULL COMMENT 'Describes the ingredient',
 	`Contains_Dairy` BINARY NOT NULL COMMENT 'Boolean for latouse information',
