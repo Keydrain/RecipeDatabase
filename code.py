@@ -1,4 +1,4 @@
-#/usr/local/bin/python3
+#!/usr/local/bin/python3
 
 """
 Author: 	Clint Cooper, Emily Rohrbough
@@ -6,6 +6,15 @@ Date:   	11/14/15
 CSCI 440:	Recipe Database
 
 Description...
+
+Need to add triggers in schema
+Insert should be transaction
+
+Errors:
+GingerBread has a '%'
+Green Bean Casserole has a '-'
+
+
 """
 
 from lxml import html
@@ -274,28 +283,31 @@ def main():
 	except:
 		print('Can\'t connect to MySQL server...\n')
 
-	#resetDatabase(cnx)
-	#if RunQuery(cnx, NumTables)[0][0] == 0:
-	#	print("Run: Create tables from SchemaSetup.")
-	#	RunSQLFile(cnx, 'SchemaSetup.sql')
-	#else:
-	#	print('Tables already built.')
-	#	resetTables(cnx)
-	#print()
-	##scrapeTableConverter(cnx)
-	#RunSQLFile(cnx, 'MEASUREMENT_CONVERSION.sql')
-#
-	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
-	#insertInfo(cnx, pageInfo)
-	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/213742/meatball-nirvana/')
-	#insertInfo(cnx, pageInfo)
-	#pageInfo = scrapeRecipe('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
-	#insertInfo(cnx, pageInfo)
+	resetDatabase(cnx)
+	if RunQuery(cnx, NumTables)[0][0] == 0:
+		print("Run: Create tables from SchemaSetup.")
+		RunSQLFile(cnx, 'SchemaSetup.sql')
+	else:
+		print('Tables already built.')
+		resetTables(cnx)
+	print()
+	scrapeTableConverter(cnx)
+	RunSQLFile(cnx, 'MEASUREMENT_CONVERSION.sql')
+
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/8691/chicken-enchiladas-i/')
+	insertInfo(cnx, pageInfo)
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/213742/meatball-nirvana/')
+	insertInfo(cnx, pageInfo)
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/219046/rich-and-creamy-beef-stroganoff/')
+	insertInfo(cnx, pageInfo)
 
 	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/14773/tangy-bbq-ribs/?internalSource=staff%20pick&referringId=673&referringContentType=recipe%20hub')
 	insertInfo(cnx, pageInfo)
 
 	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/9023/baked-teriyaki-chicken/?internalSource=staff%20pick&referringId=80&referringContentType=recipe%20hub')
+	insertInfo(cnx, pageInfo)
+
+	pageInfo = scrapeRecipe('http://allrecipes.com/recipe/15650/slow-cooker-adobo-chicken/?internalSource=staff%20pick&referringId=253&referringContentType=recipe%20hub')
 	insertInfo(cnx, pageInfo)
 
 	try: cnx.close()
