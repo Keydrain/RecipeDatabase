@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS `Recipes`.`RECIPE` (
 	`Name` VARCHAR(45) NOT NULL COMMENT 'Recipe Name',
 	`Description` MEDIUMTEXT NOT NULL COMMENT 'Recipe description',
 	`Quantity` DOUBLE NULL COMMENT 'Amount the recipe makes- assumes servings',
+	`Calories` INT NOT NULL COMMENT 'Number of Calories of the recipe',
 	`Type` VARCHAR(45) NOT NULL COMMENT 'TypeL appetizer, side dish, main course, or desert',
 	`Photo` VARCHAR(45) NULL COMMENT 'Photo of finished recipe- not required',
 	`Direction_No` INT NOT NULL COMMENT 'References the list of directions',
