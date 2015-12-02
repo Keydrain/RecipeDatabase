@@ -328,7 +328,7 @@ def main(reset):
                         #'http://allrecipes.com/recipe/9011/simple-lemon-herb-chicken/',
                         'http://allrecipes.com/recipe/85452/homemade-black-bean-veggie-burgers/',
                         'http://allrecipes.com/recipe/16723/pesto-chicken-florentine/',
-                        'http://allrecipes.com/recipe/16259/ds-famous-salsa/',
+                        'http://allrecipes.com/recipe/16259/ds-famous-salsa/'
                         ]
         
         for addr in ExampleData:
